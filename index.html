@@ -1,0 +1,1278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Beldex — Privacy, Redefined</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oxanium:wght@300;400;600;700;800&family=Sora:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+<style>
+/* ═══════════════════════════════════════════
+   RESET & VARIABLES
+═══════════════════════════════════════════ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --black:       #04060F;
+  --navy:        #080E22;
+  --navy-mid:    #0C1530;
+  --navy-card:   #0F1A38;
+  --gold:        #F5B800;
+  --gold-dim:    #C9920A;
+  --gold-glow:   rgba(245,184,0,0.18);
+  --teal:        #00C9B1;
+  --teal-glow:   rgba(0,201,177,0.15);
+  --white:       #FFFFFF;
+  --off-white:   #C8D6F0;
+  --muted:       #5A6F99;
+  --border:      rgba(245,184,0,0.12);
+  --font-head:   'Oxanium', sans-serif;
+  --font-body:   'Sora', sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--black);
+  color: var(--off-white);
+  font-family: var(--font-body);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+/* Custom cursor */
+.cursor {
+  position: fixed; top: 0; left: 0;
+  width: 12px; height: 12px;
+  background: var(--gold);
+  border-radius: 50%;
+  pointer-events: none; z-index: 9999;
+  transform: translate(-50%,-50%);
+  transition: transform 0.1s, width 0.2s, height 0.2s, opacity 0.2s;
+  mix-blend-mode: screen;
+}
+.cursor-ring {
+  position: fixed; top: 0; left: 0;
+  width: 36px; height: 36px;
+  border: 1.5px solid var(--teal);
+  border-radius: 50%;
+  pointer-events: none; z-index: 9998;
+  transform: translate(-50%,-50%);
+  transition: transform 0.18s ease, width 0.2s, height 0.2s, opacity 0.2s;
+  opacity: 0.6;
+}
+body:hover .cursor { opacity: 1; }
+
+/* ─── CANVAS BACKGROUND ─────────────── */
+#star-canvas {
+  position: fixed; inset: 0;
+  z-index: 0; pointer-events: none;
+}
+
+/* ─── NOISE TEXTURE OVERLAY ─────────── */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 1;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none; opacity: 0.4;
+}
+
+/* ═══════════════════════════════════════
+   NAV
+═══════════════════════════════════════ */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1.2rem 5%;
+  background: rgba(4,6,15,0.6);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  transition: background 0.3s;
+}
+nav.scrolled { background: rgba(4,6,15,0.92); }
+
+.nav-logo {
+  font-family: var(--font-head);
+  font-size: 1.5rem; font-weight: 800;
+  color: var(--white); letter-spacing: 3px;
+  display: flex; align-items: center; gap: 10px;
+}
+.nav-logo span { color: var(--gold); }
+.logo-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 10px var(--gold);
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%,100% { transform: scale(1); opacity: 1; }
+  50%      { transform: scale(1.5); opacity: 0.6; }
+}
+
+.nav-links {
+  display: flex; gap: 2.4rem; list-style: none;
+}
+.nav-links a {
+  color: var(--muted); text-decoration: none;
+  font-size: 0.82rem; letter-spacing: 2px;
+  font-family: var(--font-head); font-weight: 600;
+  text-transform: uppercase;
+  transition: color 0.2s;
+  position: relative;
+}
+.nav-links a::after {
+  content: ''; position: absolute; bottom: -4px; left: 0;
+  width: 0; height: 1px; background: var(--gold);
+  transition: width 0.3s;
+}
+.nav-links a:hover { color: var(--gold); }
+.nav-links a:hover::after { width: 100%; }
+
+.nav-cta {
+  background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+  color: var(--black) !important;
+  padding: 0.55rem 1.4rem;
+  border-radius: 4px;
+  font-weight: 700 !important;
+  letter-spacing: 1.5px !important;
+  transition: box-shadow 0.3s, transform 0.2s !important;
+}
+.nav-cta:hover {
+  box-shadow: 0 0 24px rgba(245,184,0,0.45) !important;
+  transform: translateY(-1px);
+}
+.nav-cta::after { display: none !important; }
+
+/* ═══════════════════════════════════════
+   HERO
+═══════════════════════════════════════ */
+#hero {
+  position: relative; z-index: 2;
+  min-height: 100vh;
+  display: flex; align-items: center;
+  padding: 0 5%;
+  overflow: hidden;
+}
+
+/* Radial glow behind hero text */
+.hero-glow {
+  position: absolute;
+  width: 700px; height: 700px;
+  background: radial-gradient(circle, rgba(245,184,0,0.07) 0%, transparent 70%);
+  left: -100px; top: 50%; transform: translateY(-50%);
+  pointer-events: none;
+}
+.hero-glow-right {
+  position: absolute;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(0,201,177,0.06) 0%, transparent 70%);
+  right: 0; top: 30%;
+  pointer-events: none;
+}
+
+.hero-content {
+  position: relative; z-index: 3;
+  max-width: 720px;
+  animation: hero-in 1s ease both;
+}
+@keyframes hero-in {
+  from { opacity: 0; transform: translateY(40px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(245,184,0,0.08);
+  border: 1px solid rgba(245,184,0,0.25);
+  border-radius: 100px;
+  padding: 0.4rem 1.1rem;
+  font-size: 0.72rem; font-weight: 600;
+  letter-spacing: 2.5px; color: var(--gold);
+  font-family: var(--font-head);
+  margin-bottom: 1.8rem;
+  animation: hero-in 1s 0.1s ease both;
+}
+.badge-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 8px var(--teal);
+  animation: pulse-dot 1.8s ease-in-out infinite;
+}
+
+.hero-title {
+  font-family: var(--font-head);
+  font-size: clamp(3rem, 7vw, 5.5rem);
+  font-weight: 800;
+  line-height: 1.05;
+  color: var(--white);
+  letter-spacing: -1px;
+  margin-bottom: 1.4rem;
+  animation: hero-in 1s 0.2s ease both;
+}
+.hero-title .gradient-text {
+  background: linear-gradient(135deg, var(--gold) 0%, #FFE27A 50%, var(--gold-dim) 100%);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.hero-title .teal-text {
+  background: linear-gradient(135deg, var(--teal), #7FFFD4);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-sub {
+  font-size: 1.1rem; line-height: 1.75;
+  color: var(--muted); max-width: 560px;
+  margin-bottom: 2.5rem;
+  animation: hero-in 1s 0.35s ease both;
+}
+.hero-sub strong { color: var(--off-white); font-weight: 500; }
+
+.hero-actions {
+  display: flex; gap: 1rem; flex-wrap: wrap;
+  animation: hero-in 1s 0.5s ease both;
+}
+
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: linear-gradient(135deg, var(--gold-dim), var(--gold));
+  color: var(--black);
+  padding: 0.85rem 2rem; border-radius: 6px;
+  font-family: var(--font-head); font-weight: 700;
+  font-size: 0.85rem; letter-spacing: 2px;
+  text-decoration: none; text-transform: uppercase;
+  transition: box-shadow 0.3s, transform 0.2s;
+  box-shadow: 0 4px 24px rgba(245,184,0,0.25);
+}
+.btn-primary:hover {
+  box-shadow: 0 6px 40px rgba(245,184,0,0.5);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: transparent;
+  border: 1px solid rgba(0,201,177,0.4);
+  color: var(--teal);
+  padding: 0.85rem 2rem; border-radius: 6px;
+  font-family: var(--font-head); font-weight: 600;
+  font-size: 0.85rem; letter-spacing: 2px;
+  text-decoration: none; text-transform: uppercase;
+  transition: background 0.3s, box-shadow 0.3s, transform 0.2s;
+}
+.btn-secondary:hover {
+  background: rgba(0,201,177,0.08);
+  box-shadow: 0 4px 28px rgba(0,201,177,0.25);
+  transform: translateY(-2px);
+}
+
+/* Hero right — floating card */
+.hero-visual {
+  position: absolute;
+  right: 5%; top: 50%; transform: translateY(-50%);
+  z-index: 3; width: 340px;
+  animation: float 6s ease-in-out infinite, hero-in 1s 0.4s ease both;
+}
+@keyframes float {
+  0%,100% { transform: translateY(-50%) translateX(0); }
+  50%      { transform: translateY(calc(-50% - 18px)) translateX(6px); }
+}
+
+.hero-card {
+  background: rgba(15,26,56,0.7);
+  border: 1px solid rgba(245,184,0,0.2);
+  border-radius: 16px;
+  padding: 2rem;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(245,184,0,0.05) inset;
+}
+.hero-card-top {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 1.5rem;
+}
+.card-logo {
+  font-family: var(--font-head); font-size: 1.1rem; font-weight: 800;
+  color: var(--gold); letter-spacing: 2px;
+}
+.card-live {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 0.7rem; color: var(--teal); letter-spacing: 1px;
+  font-family: var(--font-head);
+}
+.live-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 8px var(--teal);
+  animation: pulse-dot 1.5s ease-in-out infinite;
+}
+
+.card-price {
+  font-family: var(--font-head);
+  font-size: 2.6rem; font-weight: 800;
+  color: var(--white); letter-spacing: -1px;
+  margin-bottom: 0.3rem;
+}
+.card-ticker { font-size: 0.78rem; color: var(--muted); letter-spacing: 2px; margin-bottom: 1.4rem; }
+
+.card-stat-row { display: flex; gap: 0.8rem; margin-bottom: 1.4rem; }
+.card-stat {
+  flex: 1; background: rgba(4,6,15,0.5);
+  border: 1px solid var(--border);
+  border-radius: 8px; padding: 0.7rem;
+  text-align: center;
+}
+.stat-label { font-size: 0.65rem; color: var(--muted); letter-spacing: 2px; margin-bottom: 0.3rem; font-family: var(--font-head); }
+.stat-val   { font-family: var(--font-head); font-size: 0.92rem; font-weight: 700; color: var(--white); }
+.stat-val.up   { color: #4ADE80; }
+.stat-val.gold { color: var(--gold); }
+
+.card-bar-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.7rem; color: var(--muted); margin-bottom: 0.5rem;
+}
+.card-bar {
+  height: 4px; background: rgba(255,255,255,0.06);
+  border-radius: 4px; overflow: hidden; margin-bottom: 0.5rem;
+}
+.card-bar-fill {
+  height: 100%; border-radius: 4px;
+  background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+  animation: bar-fill 2s 1s ease both;
+}
+@keyframes bar-fill { from { width: 0; } }
+
+/* ─── SCROLL INDICATOR ─────────── */
+.scroll-indicator {
+  position: absolute; bottom: 2.5rem; left: 50%;
+  transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  z-index: 3; opacity: 0.5;
+  animation: hero-in 1s 1s ease both;
+}
+.scroll-text { font-size: 0.65rem; letter-spacing: 3px; color: var(--muted); font-family: var(--font-head); }
+.scroll-line {
+  width: 1px; height: 48px;
+  background: linear-gradient(180deg, var(--gold), transparent);
+  animation: scroll-pulse 2s ease-in-out infinite;
+}
+@keyframes scroll-pulse {
+  0%,100% { opacity: 0.3; transform: scaleY(1); }
+  50%      { opacity: 1;   transform: scaleY(1.15); }
+}
+
+/* ═══════════════════════════════════════
+   STATS TICKER
+═══════════════════════════════════════ */
+#ticker {
+  position: relative; z-index: 2;
+  background: rgba(12,21,48,0.8);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 1.1rem 0;
+  overflow: hidden;
+}
+.ticker-track {
+  display: flex; gap: 0; white-space: nowrap;
+  animation: ticker-scroll 30s linear infinite;
+}
+.ticker-track:hover { animation-play-state: paused; }
+@keyframes ticker-scroll {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.ticker-item {
+  display: inline-flex; align-items: center; gap: 10px;
+  padding: 0 2.5rem;
+  font-family: var(--font-head); font-size: 0.78rem;
+  font-weight: 600; letter-spacing: 1px;
+  border-right: 1px solid var(--border);
+}
+.ticker-label { color: var(--muted); }
+.ticker-val   { color: var(--gold); }
+.ticker-val.green { color: #4ADE80; }
+.ticker-val.teal  { color: var(--teal); }
+
+/* ═══════════════════════════════════════
+   SECTIONS COMMON
+═══════════════════════════════════════ */
+section { position: relative; z-index: 2; padding: 7rem 5%; }
+
+.section-tag {
+  display: inline-block;
+  font-family: var(--font-head); font-size: 0.7rem;
+  font-weight: 700; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--teal); margin-bottom: 1rem;
+}
+.section-title {
+  font-family: var(--font-head);
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight: 800; color: var(--white);
+  line-height: 1.1; margin-bottom: 1rem;
+}
+.section-sub {
+  font-size: 1rem; line-height: 1.7; color: var(--muted);
+  max-width: 560px; margin-bottom: 3.5rem;
+}
+
+/* ═══════════════════════════════════════
+   ABOUT / INTRO
+═══════════════════════════════════════ */
+#about {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 5rem;
+  align-items: center;
+}
+.about-left .section-sub { margin-bottom: 2rem; }
+
+.about-pillars { display: flex; flex-direction: column; gap: 1rem; }
+.pillar {
+  display: flex; align-items: flex-start; gap: 1rem;
+  padding: 1.1rem 1.4rem;
+  background: rgba(15,26,56,0.5);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  transition: border-color 0.3s, background 0.3s;
+}
+.pillar:hover {
+  border-color: rgba(245,184,0,0.35);
+  background: rgba(15,26,56,0.85);
+}
+.pillar-icon {
+  font-size: 1.4rem; min-width: 36px; text-align: center;
+  margin-top: 2px;
+}
+.pillar-text h4 {
+  font-family: var(--font-head); font-size: 0.9rem;
+  font-weight: 700; color: var(--white); margin-bottom: 0.25rem;
+  letter-spacing: 1px;
+}
+.pillar-text p { font-size: 0.83rem; color: var(--muted); line-height: 1.6; }
+
+.about-right {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;
+}
+.metric-box {
+  background: rgba(15,26,56,0.6);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 1.8rem 1.4rem;
+  text-align: center; position: relative; overflow: hidden;
+  transition: transform 0.3s, border-color 0.3s;
+}
+.metric-box:hover { transform: translateY(-4px); border-color: rgba(245,184,0,0.4); }
+.metric-box::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 3px;
+  background: linear-gradient(90deg, var(--gold-dim), var(--gold));
+}
+.metric-box:nth-child(2)::before { background: linear-gradient(90deg, var(--teal), #7FFFD4); }
+.metric-box:nth-child(3)::before { background: linear-gradient(90deg, #6E8BFF, var(--teal)); }
+.metric-box:nth-child(4)::before { background: linear-gradient(90deg, #E05C5C, #FF8A80); }
+
+.metric-number {
+  font-family: var(--font-head);
+  font-size: 2.2rem; font-weight: 800;
+  color: var(--white); line-height: 1;
+  margin-bottom: 0.4rem;
+}
+.metric-label { font-size: 0.72rem; color: var(--muted); letter-spacing: 2px; font-family: var(--font-head); }
+
+/* ═══════════════════════════════════════
+   PRODUCTS
+═══════════════════════════════════════ */
+#products { background: rgba(8,14,34,0.4); }
+
+.products-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.5rem;
+}
+
+.product-card {
+  background: rgba(15,26,56,0.55);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 2rem 1.8rem;
+  transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+  position: relative; overflow: hidden;
+  cursor: pointer;
+}
+.product-card::before {
+  content: ''; position: absolute;
+  inset: 0; opacity: 0;
+  transition: opacity 0.4s;
+  border-radius: 14px;
+}
+.product-card:hover { transform: translateY(-6px); }
+
+/* Individual card accent colors */
+.product-card.bchat    { --card-accent: #F5B800; }
+.product-card.belnet   { --card-accent: #00C9B1; }
+.product-card.browser  { --card-accent: #6E8BFF; }
+.product-card.bns      { --card-accent: #E05C5C; }
+
+.product-card:hover { border-color: var(--card-accent); box-shadow: 0 12px 50px rgba(0,0,0,0.4), 0 0 0 1px var(--card-accent) inset; }
+
+.product-icon-wrap {
+  width: 56px; height: 56px;
+  border-radius: 14px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.06);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.7rem;
+  margin-bottom: 1.4rem;
+  transition: background 0.3s;
+}
+.product-card:hover .product-icon-wrap {
+  background: rgba(255,255,255,0.08);
+}
+
+.product-tag {
+  font-family: var(--font-head); font-size: 0.65rem;
+  font-weight: 700; letter-spacing: 3px;
+  color: var(--card-accent); text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+.product-name {
+  font-family: var(--font-head); font-size: 1.25rem;
+  font-weight: 800; color: var(--white);
+  letter-spacing: 1px; margin-bottom: 0.9rem;
+}
+.product-desc {
+  font-size: 0.85rem; line-height: 1.7; color: var(--muted);
+  margin-bottom: 1.5rem;
+}
+.product-features { display: flex; flex-direction: column; gap: 0.5rem; }
+.feature-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.78rem; color: var(--off-white);
+}
+.feature-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--card-accent); flex-shrink: 0;
+}
+
+.product-arrow {
+  position: absolute; top: 1.8rem; right: 1.8rem;
+  font-size: 1.1rem; color: var(--muted);
+  transition: color 0.3s, transform 0.3s;
+}
+.product-card:hover .product-arrow { color: var(--card-accent); transform: translate(3px,-3px); }
+
+/* ═══════════════════════════════════════
+   TOKEN SECTION
+═══════════════════════════════════════ */
+#token {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 5rem;
+  align-items: center;
+}
+
+.token-visual {
+  position: relative; display: flex;
+  align-items: center; justify-content: center;
+}
+.token-ring-outer {
+  width: 280px; height: 280px;
+  border-radius: 50%;
+  border: 1px solid rgba(245,184,0,0.15);
+  display: flex; align-items: center; justify-content: center;
+  animation: ring-spin 20s linear infinite;
+}
+@keyframes ring-spin { to { transform: rotate(360deg); } }
+.ring-dot {
+  position: absolute;
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--gold);
+  box-shadow: 0 0 12px var(--gold);
+  top: -4px; left: 50%; transform: translateX(-50%);
+}
+
+.token-ring-inner {
+  width: 200px; height: 200px;
+  border-radius: 50%;
+  border: 1px solid rgba(0,201,177,0.2);
+  display: flex; align-items: center; justify-content: center;
+  animation: ring-spin 12s linear infinite reverse;
+  position: relative;
+}
+.ring-dot-2 {
+  position: absolute;
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--teal);
+  box-shadow: 0 0 10px var(--teal);
+  bottom: -3px; right: 20%;
+}
+
+.token-center {
+  width: 120px; height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(245,184,0,0.15), rgba(4,6,15,0.95));
+  border: 2px solid rgba(245,184,0,0.4);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--font-head); font-size: 1.5rem;
+  font-weight: 800; color: var(--gold);
+  box-shadow: 0 0 40px rgba(245,184,0,0.15);
+  letter-spacing: 2px;
+}
+
+.token-stats { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; }
+.token-stat-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 1rem 1.4rem;
+  background: rgba(15,26,56,0.5);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  transition: border-color 0.3s;
+}
+.token-stat-row:hover { border-color: rgba(245,184,0,0.3); }
+.ts-label { font-size: 0.78rem; color: var(--muted); letter-spacing: 1.5px; font-family: var(--font-head); }
+.ts-val   { font-family: var(--font-head); font-size: 0.95rem; font-weight: 700; color: var(--white); }
+.ts-val.gold { color: var(--gold); }
+.ts-val.teal { color: var(--teal); }
+.ts-val.green { color: #4ADE80; }
+
+/* ═══════════════════════════════════════
+   PRIVACY FEATURE STRIP
+═══════════════════════════════════════ */
+#privacy {
+  background: linear-gradient(135deg, rgba(8,14,34,0.9) 0%, rgba(4,6,15,0.95) 100%);
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+.privacy-headline {
+  font-family: var(--font-head); font-size: clamp(1.6rem,3.5vw,2.5rem);
+  font-weight: 800; color: var(--white); margin-bottom: 1rem;
+}
+.privacy-sub { font-size: 0.95rem; color: var(--muted); max-width: 540px; margin: 0 auto 3rem; }
+
+.privacy-grid {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 1.5rem;
+  max-width: 860px; margin: 0 auto;
+}
+.privacy-card {
+  background: rgba(15,26,56,0.4);
+  border: 1px solid var(--border);
+  border-radius: 12px; padding: 2rem 1.5rem;
+  transition: border-color 0.3s, transform 0.3s;
+}
+.privacy-card:hover { border-color: rgba(0,201,177,0.35); transform: translateY(-4px); }
+.privacy-emoji { font-size: 2rem; margin-bottom: 1rem; }
+.privacy-card h4 {
+  font-family: var(--font-head); font-size: 0.9rem; font-weight: 700;
+  color: var(--white); letter-spacing: 1.5px; margin-bottom: 0.5rem;
+}
+.privacy-card p { font-size: 0.8rem; color: var(--muted); line-height: 1.65; }
+
+/* ═══════════════════════════════════════
+   CTA
+═══════════════════════════════════════ */
+#cta {
+  text-align: center;
+  background: radial-gradient(ellipse at center, rgba(245,184,0,0.05) 0%, transparent 70%);
+}
+.cta-title {
+  font-family: var(--font-head); font-size: clamp(2.2rem,5vw,4rem);
+  font-weight: 800; color: var(--white); margin-bottom: 1rem;
+  line-height: 1.1;
+}
+.cta-sub { font-size: 1rem; color: var(--muted); margin-bottom: 2.5rem; }
+.cta-actions { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+/* ═══════════════════════════════════════
+   FOOTER
+═══════════════════════════════════════ */
+footer {
+  position: relative; z-index: 2;
+  background: rgba(8,14,34,0.95);
+  border-top: 1px solid var(--border);
+  padding: 3.5rem 5% 2rem;
+}
+.footer-top {
+  display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 3rem;
+  margin-bottom: 3rem;
+}
+.footer-brand-name {
+  font-family: var(--font-head); font-size: 1.4rem; font-weight: 800;
+  color: var(--white); letter-spacing: 3px; margin-bottom: 0.8rem;
+}
+.footer-brand-name span { color: var(--gold); }
+.footer-tagline { font-size: 0.82rem; color: var(--muted); line-height: 1.7; margin-bottom: 1.5rem; }
+
+.social-links { display: flex; gap: 0.8rem; }
+.social-btn {
+  width: 36px; height: 36px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.9rem; color: var(--muted);
+  text-decoration: none; transition: border-color 0.3s, color 0.3s, background 0.3s;
+}
+.social-btn:hover { border-color: var(--gold); color: var(--gold); background: rgba(245,184,0,0.07); }
+
+.footer-col h5 {
+  font-family: var(--font-head); font-size: 0.72rem;
+  font-weight: 700; letter-spacing: 3px;
+  color: var(--white); text-transform: uppercase; margin-bottom: 1.2rem;
+}
+.footer-col ul { list-style: none; display: flex; flex-direction: column; gap: 0.7rem; }
+.footer-col ul a {
+  font-size: 0.83rem; color: var(--muted); text-decoration: none;
+  transition: color 0.2s;
+}
+.footer-col ul a:hover { color: var(--gold); }
+
+.footer-bottom {
+  display: flex; align-items: center; justify-content: space-between;
+  padding-top: 2rem; border-top: 1px solid var(--border);
+  font-size: 0.75rem; color: var(--muted);
+  font-family: var(--font-head); letter-spacing: 1px;
+}
+.footer-bottom span { color: var(--gold); }
+
+/* ═══════════════════════════════════════
+   SCROLL REVEAL
+═══════════════════════════════════════ */
+.reveal {
+  opacity: 0; transform: translateY(35px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.reveal-delay-1 { transition-delay: 0.1s; }
+.reveal-delay-2 { transition-delay: 0.2s; }
+.reveal-delay-3 { transition-delay: 0.3s; }
+.reveal-delay-4 { transition-delay: 0.4s; }
+
+/* ═══════════════════════════════════════
+   RESPONSIVE
+═══════════════════════════════════════ */
+@media (max-width: 900px) {
+  .hero-visual { display: none; }
+  #about, #token { grid-template-columns: 1fr; gap: 3rem; }
+  .privacy-grid { grid-template-columns: 1fr; }
+  .footer-top { grid-template-columns: 1fr 1fr; }
+  .about-right { grid-template-columns: 1fr 1fr; }
+  .nav-links { display: none; }
+}
+@media (max-width: 600px) {
+  .footer-top { grid-template-columns: 1fr; }
+  .footer-bottom { flex-direction: column; gap: 0.5rem; text-align: center; }
+}
+</style>
+</head>
+<body>
+
+<!-- Custom Cursor -->
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- Star Canvas -->
+<canvas id="star-canvas"></canvas>
+
+<!-- ══════════════════════════════════
+     NAV
+══════════════════════════════════ -->
+<nav id="navbar">
+  <div class="nav-logo">
+    <div class="logo-dot"></div>
+    BEL<span>DEX</span>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#about">About</a></li>
+    <li><a href="#products">Products</a></li>
+    <li><a href="#token">$BDX</a></li>
+    <li><a href="#privacy">Privacy</a></li>
+    <li><a href="#cta" class="nav-cta">Get Started</a></li>
+  </ul>
+</nav>
+
+<!-- ══════════════════════════════════
+     HERO
+══════════════════════════════════ -->
+<section id="hero">
+  <div class="hero-glow"></div>
+  <div class="hero-glow-right"></div>
+
+  <div class="hero-content">
+    <div class="hero-badge">
+      <div class="badge-dot"></div>
+      PRIVACY BLOCKCHAIN ECOSYSTEM
+    </div>
+    <h1 class="hero-title">
+      Privacy Is<br>
+      Not A <span class="gradient-text">Feature</span><br>
+      It's A <span class="teal-text">Right</span>
+    </h1>
+    <p class="hero-sub">
+      Beldex is a <strong>privacy-first blockchain ecosystem</strong> built for a world where your data belongs to you. Communicate, browse, and transact — all beyond reach.
+    </p>
+    <div class="hero-actions">
+      <a href="#products" class="btn-primary">
+        ⚡ Explore Ecosystem
+      </a>
+      <a href="#token" class="btn-secondary">
+        View $BDX Token →
+      </a>
+    </div>
+  </div>
+
+  <!-- Floating BDX card -->
+  <div class="hero-visual">
+    <div class="hero-card">
+      <div class="hero-card-top">
+        <div class="card-logo">$BDX</div>
+        <div class="card-live"><div class="live-dot"></div>LIVE</div>
+      </div>
+      <div class="card-price">$0.082</div>
+      <div class="card-ticker">BELDEX / USD</div>
+      <div class="card-stat-row">
+        <div class="card-stat">
+          <div class="stat-label">24H</div>
+          <div class="stat-val up">+4.2%</div>
+        </div>
+        <div class="card-stat">
+          <div class="stat-label">MKT CAP</div>
+          <div class="stat-val gold">$62M</div>
+        </div>
+        <div class="card-stat">
+          <div class="stat-label">RANK</div>
+          <div class="stat-val">#312</div>
+        </div>
+      </div>
+      <div class="card-bar-label">
+        <span>Masternode Growth</span>
+        <span>72%</span>
+      </div>
+      <div class="card-bar">
+        <div class="card-bar-fill" style="width:72%"></div>
+      </div>
+      <div class="card-bar-label">
+        <span>Network Uptime</span>
+        <span>99.8%</span>
+      </div>
+      <div class="card-bar">
+        <div class="card-bar-fill" style="width:99.8%"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-indicator">
+    <div class="scroll-text">SCROLL</div>
+    <div class="scroll-line"></div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     STATS TICKER
+══════════════════════════════════ -->
+<div id="ticker">
+  <div class="ticker-track" id="tickerTrack">
+    <!-- Items duplicated in JS for seamless loop -->
+  </div>
+</div>
+
+<!-- ══════════════════════════════════
+     ABOUT
+══════════════════════════════════ -->
+<section id="about">
+  <div class="about-left reveal">
+    <span class="section-tag">About Beldex</span>
+    <h2 class="section-title">Built for the<br>Privacy Era</h2>
+    <p class="section-sub">
+      Beldex is a decentralized privacy ecosystem — combining encrypted messaging, a decentralized VPN, private browsing, and a privacy blockchain into one unified network.
+    </p>
+    <div class="about-pillars">
+      <div class="pillar reveal reveal-delay-1">
+        <div class="pillar-icon">🔐</div>
+        <div class="pillar-text">
+          <h4>End-to-End Encryption</h4>
+          <p>Military-grade encryption across all communications on the Beldex network.</p>
+        </div>
+      </div>
+      <div class="pillar reveal reveal-delay-2">
+        <div class="pillar-icon">🌐</div>
+        <div class="pillar-text">
+          <h4>Decentralized Infrastructure</h4>
+          <p>2,800+ masternodes power the network — no single point of failure or control.</p>
+        </div>
+      </div>
+      <div class="pillar reveal reveal-delay-3">
+        <div class="pillar-icon">🚫</div>
+        <div class="pillar-text">
+          <h4>Zero Metadata Logging</h4>
+          <p>No IP addresses, no message logs, no tracking. Your identity stays yours.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="about-right reveal reveal-delay-2">
+    <div class="metric-box">
+      <div class="metric-number">2,800+</div>
+      <div class="metric-label">MASTERNODES</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-number">100%</div>
+      <div class="metric-label">APR STAKING</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-number">4</div>
+      <div class="metric-label">DAPPS LIVE</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-number">0</div>
+      <div class="metric-label">DATA SOLD</div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     PRODUCTS
+══════════════════════════════════ -->
+<section id="products">
+  <div style="text-align:center; margin-bottom: 3.5rem;" class="reveal">
+    <span class="section-tag">Ecosystem</span>
+    <h2 class="section-title">The Full Privacy Stack</h2>
+    <p class="section-sub" style="margin:0 auto">Four powerful dApps. One unified privacy ecosystem built on the Beldex blockchain.</p>
+  </div>
+
+  <div class="products-grid">
+    <div class="product-card bchat reveal reveal-delay-1">
+      <div class="product-arrow">↗</div>
+      <div class="product-icon-wrap">💬</div>
+      <div class="product-tag">Messaging</div>
+      <div class="product-name">BChat</div>
+      <div class="product-desc">A decentralized, end-to-end encrypted messenger with no phone number required. Your conversations, truly private.</div>
+      <div class="product-features">
+        <div class="feature-item"><div class="feature-dot"></div>No phone number needed</div>
+        <div class="feature-item"><div class="feature-dot"></div>Group & channel support</div>
+        <div class="feature-item"><div class="feature-dot"></div>BNS username support</div>
+      </div>
+    </div>
+
+    <div class="product-card belnet reveal reveal-delay-2">
+      <div class="product-arrow">↗</div>
+      <div class="product-icon-wrap">🛡️</div>
+      <div class="product-tag">VPN</div>
+      <div class="product-name">BelNet</div>
+      <div class="product-desc">A decentralized VPN powered by 2,800+ masternodes. Onion-routed traffic — impossible to trace, impossible to block.</div>
+      <div class="product-features">
+        <div class="feature-item"><div class="feature-dot"></div>Onion routing protocol</div>
+        <div class="feature-item"><div class="feature-dot"></div>No central server</div>
+        <div class="feature-item"><div class="feature-dot"></div>Masternode-powered</div>
+      </div>
+    </div>
+
+    <div class="product-card browser reveal reveal-delay-3">
+      <div class="product-arrow">↗</div>
+      <div class="product-icon-wrap">🌐</div>
+      <div class="product-tag">Browser</div>
+      <div class="product-name">Beldex Browser</div>
+      <div class="product-desc">A privacy-first browser with built-in tracker blocking, ad filtering, and BelNet integration for anonymous web browsing.</div>
+      <div class="product-features">
+        <div class="feature-item"><div class="feature-dot"></div>Built-in ad blocker</div>
+        <div class="feature-item"><div class="feature-dot"></div>Tracker protection</div>
+        <div class="feature-item"><div class="feature-dot"></div>BelNet integration</div>
+      </div>
+    </div>
+
+    <div class="product-card bns reveal reveal-delay-4">
+      <div class="product-arrow">↗</div>
+      <div class="product-icon-wrap">🪪</div>
+      <div class="product-tag">Identity</div>
+      <div class="product-name">BNS</div>
+      <div class="product-desc">Beldex Name Service — replace wallet addresses and session IDs with a single human-readable identity across the ecosystem.</div>
+      <div class="product-features">
+        <div class="feature-item"><div class="feature-dot"></div>Human-readable addresses</div>
+        <div class="feature-item"><div class="feature-dot"></div>Cross-app identity</div>
+        <div class="feature-item"><div class="feature-dot"></div>Blockchain-registered</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     TOKEN
+══════════════════════════════════ -->
+<section id="token">
+  <div class="token-visual reveal">
+    <div class="token-ring-outer">
+      <div class="ring-dot"></div>
+      <div class="token-ring-inner">
+        <div class="ring-dot-2"></div>
+        <div class="token-center">$BDX</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="reveal reveal-delay-2">
+    <span class="section-tag">Token</span>
+    <h2 class="section-title">The $BDX Token</h2>
+    <p class="section-sub">Power the privacy ecosystem. Stake, earn, and transact with $BDX — the native currency of the Beldex network.</p>
+
+    <div class="token-stats">
+      <div class="token-stat-row">
+        <span class="ts-label">TICKER</span>
+        <span class="ts-val gold">$BDX</span>
+      </div>
+      <div class="token-stat-row">
+        <span class="ts-label">STAKING APR</span>
+        <span class="ts-val green">~100%</span>
+      </div>
+      <div class="token-stat-row">
+        <span class="ts-label">MASTERNODE STAKE</span>
+        <span class="ts-val">10,000 BDX</span>
+      </div>
+      <div class="token-stat-row">
+        <span class="ts-label">LISTED ON</span>
+        <span class="ts-val teal">Kraken · KuCoin · BingX</span>
+      </div>
+      <div class="token-stat-row">
+        <span class="ts-label">BLOCKCHAIN</span>
+        <span class="ts-val">CryptoNote Protocol</span>
+      </div>
+      <div class="token-stat-row">
+        <span class="ts-label">PRIVACY TECH</span>
+        <span class="ts-val gold">Ring CT + Stealth Address</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     PRIVACY
+══════════════════════════════════ -->
+<section id="privacy">
+  <div class="reveal">
+    <div class="section-tag" style="display:block; text-align:center; margin-bottom:1rem">Why Privacy Matters</div>
+    <h2 class="privacy-headline">Your Data. Your Rules.</h2>
+    <p class="privacy-sub">The internet was built without privacy. Beldex rebuilds it with privacy at the core.</p>
+  </div>
+  <div class="privacy-grid">
+    <div class="privacy-card reveal reveal-delay-1">
+      <div class="privacy-emoji">🔒</div>
+      <h4>Zero-Knowledge</h4>
+      <p>Transactions and communications leave no traceable metadata — completely invisible on-chain activity.</p>
+    </div>
+    <div class="privacy-card reveal reveal-delay-2">
+      <div class="privacy-emoji">🌍</div>
+      <h4>Censorship Resistant</h4>
+      <p>Decentralized by design — no government, ISP, or corporation can block or surveil the network.</p>
+    </div>
+    <div class="privacy-card reveal reveal-delay-3">
+      <div class="privacy-emoji">⚡</div>
+      <h4>Instant & Scalable</h4>
+      <p>Fast transactions and low fees powered by a robust masternode infrastructure built for scale.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     CTA
+══════════════════════════════════ -->
+<section id="cta">
+  <div class="reveal">
+    <h2 class="cta-title">
+      Own Your<br>
+      <span style="background:linear-gradient(135deg,var(--gold),#FFE27A);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent">
+        Privacy Today
+      </span>
+    </h2>
+    <p class="cta-sub">Join thousands of users who have taken back control. Download BChat. Try BelNet. Hold $BDX.</p>
+    <div class="cta-actions">
+      <a href="#" class="btn-primary">⬇ Download BChat</a>
+      <a href="#" class="btn-secondary">Buy $BDX →</a>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════
+     FOOTER
+══════════════════════════════════ -->
+<footer>
+  <div class="footer-top">
+    <div>
+      <div class="footer-brand-name">BEL<span>DEX</span></div>
+      <p class="footer-tagline">Privacy is not a feature — it's a fundamental right. Beldex is building the infrastructure for a private digital future.</p>
+      <div class="social-links">
+        <a class="social-btn" href="#" title="Twitter">𝕏</a>
+        <a class="social-btn" href="#" title="Telegram">✈</a>
+        <a class="social-btn" href="#" title="Discord">⬡</a>
+        <a class="social-btn" href="#" title="GitHub">⌥</a>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h5>Products</h5>
+      <ul>
+        <li><a href="#">BChat</a></li>
+        <li><a href="#">BelNet</a></li>
+        <li><a href="#">Beldex Browser</a></li>
+        <li><a href="#">BNS</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Token</h5>
+      <ul>
+        <li><a href="#">Buy $BDX</a></li>
+        <li><a href="#">Masternode</a></li>
+        <li><a href="#">Staking</a></li>
+        <li><a href="#">Exchanges</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Resources</h5>
+      <ul>
+        <li><a href="#">Whitepaper</a></li>
+        <li><a href="#">Documentation</a></li>
+        <li><a href="#">Blog</a></li>
+        <li><a href="#">Community</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2025 <span>Beldex</span>. All rights reserved.</div>
+    <div>Privacy First · Decentralized · Open Source</div>
+  </div>
+</footer>
+
+<!-- ══════════════════════════════════
+     SCRIPTS
+══════════════════════════════════ -->
+<script>
+// ─── CUSTOM CURSOR ───────────────────
+const cursor     = document.getElementById('cursor');
+const cursorRing = document.getElementById('cursorRing');
+let mx = 0, my = 0, rx = 0, ry = 0;
+
+document.addEventListener('mousemove', e => {
+  mx = e.clientX; my = e.clientY;
+  cursor.style.left = mx + 'px';
+  cursor.style.top  = my + 'px';
+});
+(function animRing() {
+  rx += (mx - rx) * 0.12;
+  ry += (my - ry) * 0.12;
+  cursorRing.style.left = rx + 'px';
+  cursorRing.style.top  = ry + 'px';
+  requestAnimationFrame(animRing);
+})();
+document.querySelectorAll('a, button, .product-card, .pillar, .metric-box').forEach(el => {
+  el.addEventListener('mouseenter', () => {
+    cursor.style.width  = '20px';
+    cursor.style.height = '20px';
+    cursorRing.style.width  = '56px';
+    cursorRing.style.height = '56px';
+  });
+  el.addEventListener('mouseleave', () => {
+    cursor.style.width  = '12px';
+    cursor.style.height = '12px';
+    cursorRing.style.width  = '36px';
+    cursorRing.style.height = '36px';
+  });
+});
+
+// ─── STAR CANVAS ─────────────────────
+const canvas = document.getElementById('star-canvas');
+const ctx = canvas.getContext('2d');
+let stars = [];
+
+function resizeCanvas() {
+  canvas.width  = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+function initStars() {
+  stars = [];
+  for (let i = 0; i < 160; i++) {
+    stars.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.2 + 0.2,
+      a: Math.random(),
+      speed: Math.random() * 0.3 + 0.05,
+      drift: (Math.random() - 0.5) * 0.08
+    });
+  }
+}
+function drawStars() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  stars.forEach(s => {
+    s.a += s.speed * 0.012;
+    if (s.a > 1) s.a = 0;
+    s.x += s.drift;
+    if (s.x < 0) s.x = canvas.width;
+    if (s.x > canvas.width) s.x = 0;
+    const alpha = Math.abs(Math.sin(s.a * Math.PI));
+    ctx.beginPath();
+    ctx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(200,214,240,${alpha * 0.5})`;
+    ctx.fill();
+  });
+  requestAnimationFrame(drawStars);
+}
+resizeCanvas(); initStars(); drawStars();
+window.addEventListener('resize', () => { resizeCanvas(); initStars(); });
+
+// ─── NAV SCROLL ──────────────────────
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// ─── TICKER ──────────────────────────
+const tickerItems = [
+  { label: '$BDX PRICE', val: '$0.082', cls: 'gold' },
+  { label: '24H CHANGE', val: '+4.2%', cls: 'green' },
+  { label: 'MASTERNODES', val: '2,847', cls: 'teal' },
+  { label: 'STAKING APR', val: '~100%', cls: 'green' },
+  { label: 'NETWORK UPTIME', val: '99.8%', cls: '' },
+  { label: 'LISTED ON', val: 'KRAKEN · KUCOIN · BINGX', cls: 'gold' },
+  { label: 'BCHAT USERS', val: '180K+', cls: 'teal' },
+  { label: 'TOTAL SUPPLY', val: '9B BDX', cls: '' },
+  { label: 'BDX BURNED', val: '1.2M+', cls: 'gold' },
+  { label: 'PRIVACY TECH', val: 'RING CT', cls: 'teal' },
+];
+const track = document.getElementById('tickerTrack');
+// Duplicate for seamless loop
+[...tickerItems, ...tickerItems].forEach(item => {
+  const div = document.createElement('div');
+  div.className = 'ticker-item';
+  div.innerHTML = `<span class="ticker-label">${item.label}</span><span class="ticker-val ${item.cls}">${item.val}</span>`;
+  track.appendChild(div);
+});
+
+// ─── SCROLL REVEAL ───────────────────
+const reveals = document.querySelectorAll('.reveal');
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      observer.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.12 });
+reveals.forEach(el => observer.observe(el));
+
+// ─── COUNTER ANIMATION ───────────────
+function animateCounters() {
+  document.querySelectorAll('.metric-number').forEach(el => {
+    const raw = el.textContent;
+    const num = parseFloat(raw.replace(/[^0-9.]/g, ''));
+    const suffix = raw.replace(/[0-9.]/g, '');
+    if (!num) return;
+    let start = 0, duration = 1600;
+    const step = timestamp => {
+      if (!start) start = timestamp;
+      const progress = Math.min((timestamp - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      el.textContent = Math.floor(eased * num) + suffix;
+      if (progress < 1) requestAnimationFrame(step);
+    };
+    requestAnimationFrame(step);
+  });
+}
+const counterSection = document.getElementById('about');
+const counterObserver = new IntersectionObserver(entries => {
+  if (entries[0].isIntersecting) { animateCounters(); counterObserver.disconnect(); }
+}, { threshold: 0.3 });
+counterObserver.observe(counterSection);
+</script>
+</body>
+</html>
